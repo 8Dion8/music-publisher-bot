@@ -42,6 +42,57 @@ def default_handler(message):
                 caption=f"[{track_name} - {track_artists}]({message.text})"
             )
 
+        case 'album':
+            album = sp.album(link_id)
+            album_name = album['name']
+            album_artists = ", ".join(artist['name'] for artist in album['artists'])
+            album_cover_url = album['images'][0]['url']
+            
+            bot.send_photo(
+                chat_id=message.chat.id,
+                photo=album_cover_url,
+                caption=f"[{album_name} - {album_artists}]({message.text})",
+                parse_mode='Markdown'
+            )
+        
+        case 'artist':
+            artist = sp.artist(link_id)
+            artist_name = artist['name']
+            artist_image_url = artist['images'][0]['url'] if artist['images'] else None
+            
+            if artist_image_url:
+                bot.send_photo(
+                    chat_id=message.chat.id,
+                    photo=artist_image_url,
+                    caption=f"[{artist_name}]({message.text})",
+                    parse_mode='Markdown'
+                )
+            else:
+                bot.send_message(
+                    chat_id=message.chat.id,
+                    text=f"[{artist_name}]({message.text})",
+                    parse_mode='Markdown'
+                )
+        
+        case 'playlist':
+            playlist = sp.playlist(link_id)
+            playlist_name = playlist['name']
+            playlist_cover_url = playlist['images'][0]['url'] if playlist['images'] else None
+            
+            if playlist_cover_url:
+                bot.send_photo(
+                    chat_id=message.chat.id,
+                    photo=playlist_cover_url,
+                    caption=f"[{playlist_name}]({message.text})",
+                    parse_mode='Markdown'
+                )
+            else:
+                bot.send_message(
+                    chat_id=message.chat.id,
+                    text=f"[{playlist_name}]({message.text})",
+                    parse_mode='Markdown'
+                )
+
         case _:
             print("empty case", link_type)
             return
