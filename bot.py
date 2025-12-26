@@ -32,64 +32,91 @@ def default_handler(message):
     match link_type:
         case 'track':
             track = sp.track(link_id)
+            print(track)
             track_name = track['name']
-            track_artists = ", ".join(artist['name'] for artist in track['artists'])
+            track_artists = ", ".join(a['name'] for a in track['artists'])
             track_cover_url = track['album']['images'][0]['url']
+
+            track_main_artist_id = track['artists'][0]['id']
+            track_main_artist = sp.artist(track_main_artist_id)
+            genres = ' '.join(f"#{genre.replace(' ', '')}" for genre in track_main_artist['genres']) if track_main_artist['genres'] else ''
+
+            caption = f"**[{track_name} - {track_artists}]({message.text})**"
+            if genres:
+                caption += f"\n\n{genres}"
             
             bot.send_photo(
                 chat_id=message.chat.id,
                 photo=track_cover_url,
-                caption=f"[{track_name} - {track_artists}]({message.text})"
+                caption=caption
             )
 
         case 'album':
             album = sp.album(link_id)
+            print(album)
             album_name = album['name']
-            album_artists = ", ".join(artist['name'] for artist in album['artists'])
+            album_artists = ", ".join(a['name'] for a in album['artists'])
             album_cover_url = album['images'][0]['url']
+
+            track_main_artist_id = album['artists'][0]['id']
+            track_main_artist = sp.artist(track_main_artist_id)
+            genres = ' '.join(f"#{genre.replace(' ', '')}" for genre in track_main_artist['genres']) if track_main_artist['genres'] else ''
+
+            caption = f"**[{album_name} - {album_artists}]({message.text})**"
+            if genres:
+                caption += f"\n\n{genres}"
             
             bot.send_photo(
                 chat_id=message.chat.id,
                 photo=album_cover_url,
-                caption=f"[{album_name} - {album_artists}]({message.text})",
+                caption=caption,
                 parse_mode='Markdown'
             )
         
         case 'artist':
-            artist = sp.artist(link_id)
-            artist_name = artist['name']
-            artist_image_url = artist['images'][0]['url'] if artist['images'] else None
+            track_main_artist = sp.artist(link_id)
+            print(track_main_artist)
+            artist_name = track_main_artist['name']
+            artist_image_url = track_main_artist['images'][0]['url'] if track_main_artist['images'] else None
+            genres = ' '.join(f"#{genre.replace(' ', '')}" for genre in track_main_artist['genres']) if track_main_artist['genres'] else ''
+
+            caption = f"**[{artist_name}]({message.text})**"
+            if genres:
+                caption += f"\n\n{genres}"
             
             if artist_image_url:
                 bot.send_photo(
                     chat_id=message.chat.id,
                     photo=artist_image_url,
-                    caption=f"[{artist_name}]({message.text})",
+                    caption=caption,
                     parse_mode='Markdown'
                 )
             else:
                 bot.send_message(
                     chat_id=message.chat.id,
-                    text=f"[{artist_name}]({message.text})",
+                    text=caption,
                     parse_mode='Markdown'
                 )
         
         case 'playlist':
             playlist = sp.playlist(link_id)
+            print(playlist)
             playlist_name = playlist['name']
             playlist_cover_url = playlist['images'][0]['url'] if playlist['images'] else None
+
+            caption = f"**[{playlist_name}]({message.text})**"
             
             if playlist_cover_url:
                 bot.send_photo(
                     chat_id=message.chat.id,
                     photo=playlist_cover_url,
-                    caption=f"[{playlist_name}]({message.text})",
+                    caption=caption,
                     parse_mode='Markdown'
                 )
             else:
                 bot.send_message(
                     chat_id=message.chat.id,
-                    text=f"[{playlist_name}]({message.text})",
+                    text=caption,
                     parse_mode='Markdown'
                 )
 
